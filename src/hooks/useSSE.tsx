@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 interface SSEOptions {
   onError?: (error: Event) => void;
@@ -10,21 +10,24 @@ interface SSEOptions {
 export function useSSE<T>(url: string | null, options: SSEOptions = {}) {
   const [data, setData] = useState<T | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const eventSourceRef = useRef<EventSource | null>(null);
 
   const {
     onError,
     onOpen,
-    retryOnError = true,
+    retryOnError = false,
     retryInterval = 5000,
   } = options;
 
   const connect = useCallback(() => {
-    if (!url) return null;
+    if (!url) return;
 
-    const eventSource = new EventSource(url);
-    
+    const eventSource = new EventSource(url, { withCredentials: true });
+    eventSourceRef.current = eventSource;
+
     eventSource.onopen = () => {
       setIsConnected(true);
+      onOpen && onOpen();
     };
 
     eventSource.onmessage = (event) => {
@@ -33,32 +36,32 @@ export function useSSE<T>(url: string | null, options: SSEOptions = {}) {
         setData(parsedData);
       } catch (err) {
         const error = err instanceof Error ? err : new Error('Failed to parse SSE data');
-        console.log("Error receiving Live Updates : ",err);
+        console.error("Error receiving Live Updates: ", error);
       }
     };
 
     eventSource.onerror = (event) => {
       setIsConnected(false);
-      const error = new Error('SSE connection error');
+      onError && onError(event);
       eventSource.close();
-      if (retryOnError) {
-        setTimeout(() => connect(), retryInterval);
-      }
     };
-
-    return eventSource;
   }, [url, onError, onOpen, retryOnError, retryInterval]);
 
-  useEffect(() => {
-    const eventSource = connect();
-    return () => {
-      eventSource?.close();
-    };
+  const stopLive = useCallback(() => {
+    eventSourceRef.current?.close();
+    eventSourceRef.current = null;
+    setIsConnected(false);
   }, []);
+
+  useEffect(() => {
+    if (url) connect();
+    return () => stopLive();
+  }, [url, connect, stopLive]);
 
   return {
     data,
     isConnected,
-    setData
+    setData,
+    stopLive
   };
 }

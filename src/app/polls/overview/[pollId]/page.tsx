@@ -31,7 +31,7 @@ const PollOverview = () => {
     if (!pollId) return;
     setIsLoading(true);
     try {
-      const response = await axiosInstance.get(`/polls/${pollId as string}/overview`);
+      const response = await axiosInstance.get(`/${pollId as string}/overview`);
       setPollData(response.data.poll_data);
       setRecentVotes(response.data.last_10_votes);
     } catch (error) {

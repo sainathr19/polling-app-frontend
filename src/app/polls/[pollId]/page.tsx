@@ -4,8 +4,8 @@ import PollResultGraph from "@/components/PollResultGraph";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { castVote, fetchWithPollId } from "@/services/poll.service";
-import { useEffect, useState, useCallback } from "react";
+import { CastVote, FetchWithPollId } from "@/services/poll.service";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams } from "next/navigation";
 import useLoading from "@/hooks/useLoading";
 import { useSSE } from "@/hooks/useSSE";
@@ -18,26 +18,27 @@ const SSE_BASE_URL = process.env.NEXT_PUBLIC_SSE_BASE_URL || 'http://localhost:5
 
 const ViewPoll = () => {
   const [pollData, setPollData] = useState<Poll | null>(null);
-  const [LiveData , setLiveData] = useState<Poll>();
+  const [liveData, setLiveData] = useState<Poll>();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [hasVoted, setHasVoted] = useState(false);
   const { isLoading, setLoading } = useLoading();
   const { pollId } = useParams();
 
-  const sseUrl = pollId ? `${SSE_BASE_URL}/polls/${pollId}/live` : null;
+  const sseUrl = pollId ? `${SSE_BASE_URL}/${pollId}/live` : null;
   const isPollClosed = pollData?.status === "CLOSED";
 
-  const { data, setData } = useSSE<PollUpdate>(sseUrl, {
-    onError: () => toast.error("Lost connection to live updates"),
-  });
-  useEffect(()=>{
-    setLiveData(data?.poll_data)
-  },[data])
+  const { data, setData, stopLive } = useSSE<PollUpdate>(sseUrl, {});
+  const sseStopRef = useRef(stopLive);
+
+  useEffect(() => {
+    setLiveData(data?.poll_data);
+  }, [data]);
+
   const fetchPollData = useCallback(async () => {
     if (!pollId) return;
     setLoading(true);
     try {
-      const data = await fetchWithPollId(pollId as string);
+      const data = await FetchWithPollId(pollId as string);
       setPollData(data);
     } catch (error) {
       toast.error("Failed to load poll data");
@@ -48,7 +49,10 @@ const ViewPoll = () => {
 
   useEffect(() => {
     fetchPollData();
-  }, []);
+    return () => {
+      sseStopRef.current();
+    };
+  }, [fetchPollData]);
 
   const handleVote = async () => {
     if (!selectedOption || !pollId) {
@@ -56,9 +60,9 @@ const ViewPoll = () => {
       return;
     }
     try {
-      await castVote(pollId as string, selectedOption);
+      await CastVote(pollId as string, selectedOption);
       toast.success("Vote cast successfully!");
-      setHasVoted(false);
+      setHasVoted(true);
     } catch (error) {
       toast.error("Failed to cast vote. Please try again.");
     }
@@ -67,7 +71,6 @@ const ViewPoll = () => {
   if (isLoading || !pollData) {
     return <Loader />;
   }
-
   return (
     <section className="grid grid-cols-1 md:grid-cols-2 gap-5 h-full place-content-center">
       <div className="h-full w-full flex justify-center items-center">
@@ -109,8 +112,8 @@ const ViewPoll = () => {
       <Card className="outline-none border-none rounded-none shadow-none flex justify-center items-center h-full">
         {isPollClosed ? (
           <PollResultGraph PollData={pollData} />
-        ) : LiveData ? (
-          <PollResultGraph PollData={LiveData} />
+        ) : liveData ? (
+          <PollResultGraph PollData={liveData} />
         ) : (
           <span>Vote to view Results</span>
         )}
