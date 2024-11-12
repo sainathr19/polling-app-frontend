@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-label";
 import { Trash } from "lucide-react";
 import { toast } from "react-hot-toast";
-import { create_new_poll } from "@/services/poll.service";
+import { CreateNewPoll } from "@/services/poll.service";
+import { useAuth } from '@/hooks/useAuth';
 
 interface PollData {
   title: string;
@@ -23,7 +24,7 @@ const MAX_OPTIONS = 10;
 const CreatePoll = () => {
   const [pollData, setPollData] = useState<PollData>(INITIAL_POLL_STATE);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const {Username} = useAuth();
   // Validation functions
   const validateTitle = (title: string): boolean => {
     return title.trim().length >= 3 && title.trim().length <= 200;
@@ -89,7 +90,8 @@ const CreatePoll = () => {
 
     try {
       setIsSubmitting(true);
-      const newPollId = await create_new_poll(
+      const newPollId = await CreateNewPoll(
+        Username || "",
         pollData.title.trim(),
         pollData.options.map(opt => opt.trim())
       );
