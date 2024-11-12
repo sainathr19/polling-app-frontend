@@ -1,13 +1,13 @@
 import axios, { AxiosError } from "axios";
-
-async function create_new_poll(title : string , options : string[]){
+import axiosInstance from "./api.service";
+async function CreateNewPoll(username : string , title : string , options : string[]){
     const reqBody = {
-        username : "sainathr19",
+        username,
         title,
         options
     }
     try{
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/polls/new`,reqBody);
+        const response = await axiosInstance.post(`/polls/new`,reqBody);
         return response.data;
     }catch(err){
         console.log("Error Creating Poll : ",err);
@@ -15,13 +15,13 @@ async function create_new_poll(title : string , options : string[]){
     }
 } 
 
-async function reset_poll(pollId : string ){
+async function ResetPollById(pollId : string ){
     const reqBody = {
         username : "tklmro",
         pollId
     }
     try{
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/polls/${pollId}/reset`,reqBody);
+        const response = await axiosInstance.post(`/polls/${pollId}/reset`,reqBody);
         return response.data;
     }catch(err){
         console.log("Error Creating Poll : ",err);
@@ -29,9 +29,9 @@ async function reset_poll(pollId : string ){
     }
 } 
 
-async function fetchWithPollId(pollId : string ){
+async function FetchWithPollId(pollId : string ){
     try{
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/polls/${pollId}/search`);
+        const response = await axiosInstance.get(`/polls/${pollId}/search`);
         return response.data;
     }catch(err){
         console.log("Error Fetching Poll Data : ",err);
@@ -40,9 +40,9 @@ async function fetchWithPollId(pollId : string ){
 } 
 
 
-async function fetch_all_polls(){
+async function FetchAllPolls(){
     try{
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/polls/all`);
+        const response = await axiosInstance.get(`/polls/all`);
         return response.data;
     }catch(err){
         console.log("Error Fetching Polls : ",err);
@@ -50,10 +50,19 @@ async function fetch_all_polls(){
     }
 } 
 
-
-async function deletPollById(pollId : string){
+async function FetchUserPolls(userName : string){
     try{
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/polls/${pollId}/delete`);
+        const response = await axiosInstance.get(`/polls/all?userId=${userName}`);
+        return response.data;
+    }catch(err){
+        console.log("Error Fetching Polls : ",err);
+        throw new Error("Error Fetching Polls");
+    }
+} 
+
+async function DeletPollById(pollId : string){
+    try{
+        const response = await axiosInstance.get(`/polls/${pollId}/delete`);
         return response.data;
     }catch(err){
         console.log(`Error Deleting Poll with Id : ${pollId}`,err);
@@ -61,9 +70,9 @@ async function deletPollById(pollId : string){
     }
 } 
 
-async function resetPollByID(pollId : string){
+async function ResetPollByID(pollId : string){
     try{
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/polls/${pollId}/reset`);
+        const response = await axiosInstance.get(`/polls/${pollId}/reset`);
         return response.data;
     }catch(err){
         console.log(`Error Resettign Poll with Id : ${pollId}`,err);
@@ -72,9 +81,9 @@ async function resetPollByID(pollId : string){
 } 
 
 
-async function closePollByID(pollId : string){
+async function ClosePollByID(pollId : string){
     try{
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/polls/${pollId}/close`);
+        const response = await axiosInstance.post(`/polls/${pollId}/close`);
         return response.data;
     }catch(err){
         console.log(`Error Closing Poll with Id : ${pollId}`,err);
@@ -83,9 +92,9 @@ async function closePollByID(pollId : string){
 } 
 
 
-async function castVote(pollId : string , optionId : string){
+async function CastVote(pollId : string , optionId : string){
     try{
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/polls/${pollId}/vote?option_id=${optionId}`);
+        const response = await axiosInstance.post(`/polls/${pollId}/vote?option_id=${optionId}`);
         return response.data;
     }catch(err){
         let error : AxiosError = err as AxiosError;
@@ -93,5 +102,5 @@ async function castVote(pollId : string , optionId : string){
         throw new Error("Error casting Vote");
     }
 } 
-export { create_new_poll, fetchWithPollId, fetch_all_polls, reset_poll,deletPollById , resetPollByID , closePollByID,castVote };
+export { CreateNewPoll, FetchWithPollId, FetchAllPolls, ResetPollByID,DeletPollById , ResetPollById , ClosePollByID,CastVote ,FetchUserPolls};
 
