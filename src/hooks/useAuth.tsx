@@ -15,7 +15,8 @@ import React, {
 interface AuthContextType {
   isAuthenticated: boolean;
   loading: boolean;
-  setIsAuthenticated : Dispatch<SetStateAction<boolean>>
+  setIsAuthenticated : Dispatch<SetStateAction<boolean>>,
+  Username : string | null
 }
 
 interface AuthProviderProps {
@@ -25,13 +26,15 @@ interface AuthProviderProps {
 const AuthContext = createContext<AuthContextType>({
   isAuthenticated : false,
   loading : false,
-  setIsAuthenticated : ()=>{}
+  setIsAuthenticated : ()=>{},
+  Username : null
 });
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [Username,setUsername] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useLayoutEffect(() => {
@@ -43,6 +46,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         });
         if (res.status === 200) {
           setIsAuthenticated(true);
+          console.log(res.data);
+          setUsername(res.data)
         } else {
           setIsAuthenticated(false);
         }
@@ -59,7 +64,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   },[isAuthenticated])
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, loading ,setIsAuthenticated}}>
+    <AuthContext.Provider value={{ isAuthenticated, loading ,setIsAuthenticated,Username}}>
       {children}
     </AuthContext.Provider>
   );
