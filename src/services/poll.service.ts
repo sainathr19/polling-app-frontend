@@ -42,7 +42,7 @@ async function FetchWithPollId(pollId : string ){
 
 async function FetchAllPolls(){
     try{
-        const response = await axiosInstance.get(`/polls/all`);
+        const response = await axiosInstance.get(`/all`);
         return response.data;
     }catch(err){
         console.log("Error Fetching Polls : ",err);
@@ -52,7 +52,7 @@ async function FetchAllPolls(){
 
 async function FetchUserPolls(userName : string){
     try{
-        const response = await axiosInstance.get(`/polls/all?userId=${userName}`);
+        const response = await axiosInstance.get(`/all?userId=${userName}`);
         return response.data;
     }catch(err){
         console.log("Error Fetching Polls : ",err);

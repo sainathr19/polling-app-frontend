@@ -22,16 +22,14 @@ const PollOverview = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [LiveData,setLiveData] = useState<Poll>();
 
-  const sseUrl = pollId ? `${SSE_BASE_URL}/polls/${pollId}/live` : null;
-  const { data: liveData, setData } = useSSE<PollUpdate>(sseUrl, {
-    onError: () => toast.error("Lost connection to live updates"),
-  });
+  const sseUrl = pollId ? `${SSE_BASE_URL}/${pollId}/live` : null;
+  const { data: liveData, setData } = useSSE<PollUpdate>(sseUrl, {});
 
   const fetchPollData = useCallback(async () => {
     if (!pollId) return;
     setIsLoading(true);
     try {
-      const response = await axiosInstance.get(`/${pollId as string}/overview`);
+      const response = await axiosInstance.get(`polls/${pollId as string}/overview`);
       setPollData(response.data.poll_data);
       setRecentVotes(response.data.last_10_votes);
     } catch (error) {
@@ -43,7 +41,7 @@ const PollOverview = () => {
 
   useEffect(() => {
     fetchPollData();
-  }, [fetchPollData]);
+  }, []);
 
   useEffect(() => {
     if (isLiveUpdates && liveData) {

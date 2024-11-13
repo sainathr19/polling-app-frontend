@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import useLoading from "@/hooks/useLoading";
-import { fetch_all_polls } from "@/services/poll.service";
+import { FetchAllPolls } from "@/services/poll.service";
 import { useEffect, useState } from "react";
 interface PollOption {
   optionText: string;
@@ -30,10 +30,10 @@ interface PollInfo {
 export default function Home() {
   const [availablePolls, setAvailablePolls] = useState<PollInfo[]>([]);
   const {isLoading,setLoading} = useLoading();
-  const FetchAllPolls = async () => {
+  const GetAllPolls = async () => {
     setLoading(true);
     try {
-      const polls = await fetch_all_polls();
+      const polls = await FetchAllPolls();
       setAvailablePolls(polls);
     } catch (err) {
       console.log(err);
@@ -42,7 +42,7 @@ export default function Home() {
     }
   };
   useEffect(() => {
-    FetchAllPolls();
+    GetAllPolls();
   }, []);
   if(isLoading){
     return <Loader/>
