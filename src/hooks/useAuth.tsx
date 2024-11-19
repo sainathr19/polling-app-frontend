@@ -7,7 +7,6 @@ import React, {
   useState,
   useLayoutEffect,
   ReactNode,
-  useEffect,
   Dispatch,
   SetStateAction,
 } from "react";
@@ -15,8 +14,8 @@ import React, {
 interface AuthContextType {
   isAuthenticated: boolean;
   loading: boolean;
-  setIsAuthenticated : Dispatch<SetStateAction<boolean>>,
-  Username : string | null
+  setIsAuthenticated: Dispatch<SetStateAction<boolean>>;
+  Username: string | null;
 }
 
 interface AuthProviderProps {
@@ -24,47 +23,54 @@ interface AuthProviderProps {
 }
 
 const AuthContext = createContext<AuthContextType>({
-  isAuthenticated : false,
-  loading : false,
-  setIsAuthenticated : ()=>{},
-  Username : null
+  isAuthenticated: false,
+  loading: true,
+  setIsAuthenticated: () => {},
+  Username: null
 });
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [Username,setUsername] = useState<string | null>(null);
+  const [Username, setUsername] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  useLayoutEffect(() => {
-    const verifyUser = async () => {
-      setLoading(true);
-      try {
-        const res = await axiosInstance.get("auth/verify", {
-          withCredentials: true,
-        });
-        if (res.status === 200) {
-          setIsAuthenticated(true);
-          console.log(res.data);
-          setUsername(res.data)
-        } else {
-          setIsAuthenticated(false);
-        }
-      } catch (err) {
+  const verifyUser = async () => {
+    setLoading(true);
+    try {
+      const res = await axiosInstance.get("auth/verify", {
+        withCredentials: true,
+      });
+      
+      if (res.status === 200 && res.data) {
+        setIsAuthenticated(true);
+        setUsername(res.data.username || res.data);
+      } else {
         setIsAuthenticated(false);
-      } finally {
-        setLoading(false);
+        setUsername(null);
       }
-    };
+    } catch (err) {
+      setIsAuthenticated(false);
+      setUsername(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useLayoutEffect(() => {
     verifyUser();
   }, []);
-  useEffect(()=>{
-    console.log("Auth Status : ",isAuthenticated);
-  },[isAuthenticated])
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, loading ,setIsAuthenticated,Username}}>
+    <AuthContext.Provider 
+      value={{ 
+        isAuthenticated, 
+        loading, 
+        setIsAuthenticated, 
+        Username 
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
