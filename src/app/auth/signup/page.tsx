@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,22 +12,27 @@ export default function SignUp() {
   const [username, setUsername] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
 
-
   const handleRegister = async () => {
     if (!username) {
-      toast.error("Please enter Username");
+      toast.error("Please enter a username");
       return;
     }
+
     setIsRegistering(true);
     try {
       const options = await startRegistrationWithUsername(username);
-      const credential = await startRegistration({optionsJSON : options});
-      if (!credential) {
-        throw new Error("Failed to create credentials");
-      }
-      finishRegistrationwithUsername(username,credential);
+      const credential = await startRegistration({ optionsJSON: options });
 
+      if (!credential) {
+        toast.error("Failed to create credentials");
+        return;
+      }
+
+      await finishRegistrationwithUsername(username, credential);
+      toast.success("Registration successful");
     } catch (err: any) {
+      const errorMessage = err.message || "Registration failed";
+      toast.error(errorMessage);
       console.error(err);
     } finally {
       setIsRegistering(false);
