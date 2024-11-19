@@ -10,45 +10,68 @@ import {
 } from "@/components/ui/card";
 import useLoading from "@/hooks/useLoading";
 import { FetchAllPolls } from "@/services/poll.service";
+import { Poll } from "@/types/poll";
 import { useEffect, useState } from "react";
-interface PollOption {
-  optionText: string;
-  optionId: string;
-  votes: number;
-}
-
-interface PollInfo {
-  title: string;
-  creatorId: string;
-  pollId: string;
-  options: PollOption[];
-  status: "OPEN" | "CLOSED";
-  createdAt: string;
-  updatedAt: string;
-}
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 export default function Home() {
-  const [availablePolls, setAvailablePolls] = useState<PollInfo[]>([]);
+  const [availablePolls, setAvailablePolls] = useState<Poll[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const {isLoading,setLoading} = useLoading();
-  const GetAllPolls = async () => {
+  const FetchPolls = async () => {
     setLoading(true);
     try {
       const polls = await FetchAllPolls();
       setAvailablePolls(polls);
     } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to fetch polls";
+      setError(errorMessage);
       console.log(err);
     }finally{
         setLoading(false);
     }
   };
   useEffect(() => {
-    GetAllPolls();
+    FetchPolls();
   }, []);
-  if(isLoading){
-    return <Loader/>
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader />
+      </div>
+    );
   }
+
+  if (error) {
+    return (
+      <Alert variant="destructive" className="m-4">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (!availablePolls.length) {
+    return (
+      <Card className="m-4">
+        <CardHeader>
+          <CardTitle>No Polls Available</CardTitle>
+          <CardDescription>
+            There are currently no active polls. Check back later!
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
+
   return (
     <Card className="rounded-none shadow-nnone bg-none h-full">
+      <CardHeader className="text-center">
+        <CardTitle>Available Polls</CardTitle>
+        <CardDescription>Browse and participate in active polls</CardDescription>
+      </CardHeader>
       <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-6">
         {availablePolls.map((poll) => {
           return <PollPreview poll={poll} key={poll.pollId} />;
