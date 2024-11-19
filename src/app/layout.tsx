@@ -1,8 +1,8 @@
 "use client";
 import Navbar from "@/components/navbar/Navbar";
-import { Toaster } from "react-hot-toast";
 import "./globals.css";
-import { AuthProvider, useAuth } from "@/hooks/useAuth";
+import RootProvider from "@/providers/RootProvider";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export default function RootLayout({
   children,
@@ -11,12 +11,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="flex flex-col h-screen">
-        <AuthProvider>
-        <Toaster />
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        </AuthProvider>
+      <body className="flex flex-col min-h-screen">
+        <ErrorBoundary>
+          <RootProvider>
+            <Navbar />
+            <main className="flex-1">{children}</main>
+          </RootProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
