@@ -24,3 +24,9 @@ export interface PollUpdate{
   poll_data : Poll,
   last_10_votes : VoteData[]
 }
+
+
+export interface NewPollData {
+  title: string;
+  options: string[];
+}

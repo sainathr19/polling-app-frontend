@@ -7,13 +7,10 @@ import { Trash } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { CreateNewPoll } from "@/services/poll.service";
 import { useAuth } from '@/hooks/useAuth';
+import { validateOptions, validateTitle } from '@/lib/validators';
+import { NewPollData } from '@/types/poll';
 
-interface PollData {
-  title: string;
-  options: string[];
-}
-
-const INITIAL_POLL_STATE: PollData = {
+const INITIAL_POLL_STATE: NewPollData = {
   title: '',
   options: ['', ''] 
 };
@@ -22,23 +19,10 @@ const MIN_OPTIONS = 2;
 const MAX_OPTIONS = 10;
 
 const CreatePoll = () => {
-  const [pollData, setPollData] = useState<PollData>(INITIAL_POLL_STATE);
+  const [pollData, setPollData] = useState<NewPollData>(INITIAL_POLL_STATE);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {Username} = useAuth();
-  // Validation functions
-  const validateTitle = (title: string): boolean => {
-    return title.trim().length >= 3 && title.trim().length <= 200;
-  };
 
-  const validateOptions = (options: string[]): boolean => {
-    const uniqueOptions = new Set(options.map(opt => opt.trim()));
-    return (
-      options.every(opt => opt.trim().length > 0) && 
-      uniqueOptions.size === options.length
-    );
-  };
-
-  // Event handlers
   const handleTitleChange = (title: string) => {
     setPollData(prev => ({ ...prev, title }));
   };
