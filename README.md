@@ -1,3 +1,16 @@
+## Project Setup and Run Instructions
+
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/sainathr19/polling-app-frontend.git
+   cd polling-app-frontend
+3. **Install Dependecies**  
+   ```bash
+   npm install
+4. **Run Developement Server**  
+   ```bash
+   npm run dev
+
 ### SignIn Page
 ![SignIn Page](https://github.com/user-attachments/assets/b40772a1-3858-4ccc-9103-97bc0277a780)
 
