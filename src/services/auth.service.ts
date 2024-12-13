@@ -23,6 +23,7 @@ async function finishRegistrationwithUsername(username: string, credentials: any
 async function startAuthenticationWithUsername(username: string) {
     try {
         const response = await axiosInstance.post(`/auth/authenticate/start/${username}`);
+        console.log(response.data.publicKey)
         return response.data.publicKey;
     } catch (err) {
         console.error(err);

@@ -1,0 +1,32 @@
+# Node modules
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Logs
+*.log
+
+# Build artifacts
+.next
+out
+build
+dist
+
+# Local environment files
+.env*
+!.env.production
+
+# Git files
+.git
+.gitignore
+
+# Docker files
+Dockerfile
+.dockerignore
+
+# Editor and OS-specific files
+.vscode
+.idea
+*.swp
+.DS_Store
+Thumbs.db
