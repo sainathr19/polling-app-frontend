@@ -1,8 +1,20 @@
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
+import { Button } from "../ui/button";
+import { LogOutIcon } from "lucide-react";
+import axiosInstance from "@/services/api.service";
 
 const Navbar = () => {
-  const {isAuthenticated} = useAuth();
+  const {isAuthenticated , setIsAuthenticated} = useAuth();
+
+  const handleLogout = async () => {
+    try{
+      await axiosInstance.get("/auth/logout")
+      setIsAuthenticated(false)
+    }catch(err){
+      console.log(err);
+    }
+  }
   return (
     <nav className="w-full bg-slate-100 py-3 px-8 flex justify-between">
       <Link href="/" className="text-xl font-medium">
@@ -24,6 +36,8 @@ const Navbar = () => {
           >
             <span className="text-base">Create New</span>
           </Link>
+
+          <Button variant="secondary" onClick={handleLogout}><LogOutIcon/></Button>
           </>
         }
       </div>
