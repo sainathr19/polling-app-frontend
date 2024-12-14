@@ -12,10 +12,6 @@ out
 build
 dist
 
-# Local environment files
-.env*
-!.env.production
-
 # Git files
 .git
 .gitignore
