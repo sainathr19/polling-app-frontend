@@ -39,7 +39,7 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:latest
           build-args: |
-            NEXT_PUBLIC_BACKEND_BASE_URL=${{ env.NEXT_PUBLIC_BACKEND_BASE_URL }}  # Pass the frontend environment variable
+            NEXT_PUBLIC_BACKEND_BASE_URL=${{ env.NEXT_PUBLIC_BACKEND_BASE_URL }}
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.9
