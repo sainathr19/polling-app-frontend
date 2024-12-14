@@ -6,11 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { startRegistration } from "@simplewebauthn/browser";
 import toast from "react-hot-toast";
-import { finishRegistrationwithUsername, startRegistrationWithUsername } from "@/services/auth.service";
+import axiosInstance from "@/lib/api.service";
 
 export default function SignUp() {
   const [username, setUsername] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
+
 
   const handleRegister = async () => {
     if (!username) {
@@ -20,20 +21,19 @@ export default function SignUp() {
 
     setIsRegistering(true);
     try {
-      const options = await startRegistrationWithUsername(username);
-      const credential = await startRegistration({ optionsJSON: options });
+      const {data : SignupResponse} = await axiosInstance.post(`/auth/register/start/${username}`);
+
+      const credential = await startRegistration({ optionsJSON: SignupResponse.publicKey });
 
       if (!credential) {
         toast.error("Failed to create credentials");
         return;
       }
 
-      await finishRegistrationwithUsername(username, credential);
-      toast.success("Registration successful");
+      const {data : response} = await axiosInstance.post(`/auth/register/finish/${username}`, credential);
+      toast.success(response);
     } catch (err: any) {
-      const errorMessage = err.message || "Registration failed";
-      toast.error(errorMessage);
-      console.error(err);
+      toast.error(err.data?.message || "SignUp Failed");
     } finally {
       setIsRegistering(false);
     }

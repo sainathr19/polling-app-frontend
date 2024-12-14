@@ -5,10 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-label";
 import { Trash } from "lucide-react";
 import { toast } from "react-hot-toast";
-import { CreateNewPoll } from "@/services/poll.service";
 import { useAuth } from '@/hooks/useAuth';
 import { validateOptions, validateTitle } from '@/lib/validators';
 import { NewPollData } from '@/types/poll';
+import axiosInstance from '@/lib/api.service';
 
 const INITIAL_POLL_STATE: NewPollData = {
   title: '',
@@ -72,19 +72,18 @@ const CreatePoll = () => {
       return;
     }
 
+    setIsSubmitting(true);
     try {
-      setIsSubmitting(true);
-      const newPollId = await CreateNewPoll(
-        Username || "",
-        pollData.title.trim(),
-        pollData.options.map(opt => opt.trim())
-      );
-      toast.success("Poll created successfully!");
+      const RequestConfig = {
+        username : Username,
+        title : pollData.title,
+        options : pollData.options.map(opt=>opt.trim())
+      }
+      const {data : response} = await axiosInstance.post(`/polls/new`, RequestConfig);
+      toast.success(response);
       setPollData(INITIAL_POLL_STATE); 
-      return newPollId;
-    } catch (error) {
-      toast.error("Failed to create poll. Please try again.");
-      console.error("Poll creation error:", error);
+    } catch (error : any) {
+      toast.error(error.data?.message);
     } finally {
       setIsSubmitting(false);
     }

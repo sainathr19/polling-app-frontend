@@ -5,18 +5,17 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import useLoading from "@/hooks/useLoading";
 import { startAuthentication } from "@simplewebauthn/browser";
-import { finishAuthenticationwithUsername, startAuthenticationWithUsername } from "@/services/auth.service";
 import { useAuth } from "@/hooks/useAuth";
+import axiosInstance from "@/lib/api.service";
 
 export default function SignIn() {
   const [username, setUsername] = useState("");
   const { isLoading, setLoading } = useLoading();
-  const { isAuthenticated, setIsAuthenticated } = useAuth();
+  const { setIsAuthenticated } = useAuth();
   const router = useRouter();
 
   const handleSignIn = async () => {
@@ -26,16 +25,20 @@ export default function SignIn() {
     }
     setLoading(true);
     try {
-      const options = await startAuthenticationWithUsername(username);
-      const credential = await startAuthentication({ optionsJSON: options });
+      const {data : OptionsResponse} = await axiosInstance.post(`/auth/authenticate/start/${username}`);
+
+      const credential = await startAuthentication({ optionsJSON: OptionsResponse.publicKey });
+
       if (!credential) {
-        throw new Error("Failed to create credentials");
+        toast.error("Failed to verify Passkey");
       }
-      await finishAuthenticationwithUsername(username, credential);
+      const {data : response} = await axiosInstance.post(`/auth/authenticate/finish/${username}`, credential);
+      toast.success(response);
       setIsAuthenticated(true);
       router.push("/");
     } catch (err: any) {
       console.error(err);
+      toast.error(err.data?.message || "Signin Failed")
     } finally {
       setLoading(false);
     }
@@ -58,8 +61,8 @@ export default function SignIn() {
               onChange={(e) => setUsername(e.target.value)}
             />
           </div>
-          <Button type="submit" className="w-full" onClick={handleSignIn}>
-            Sign in with Passkey
+          <Button type="submit" className="w-full" onClick={handleSignIn} disabled={isLoading}>
+            {isLoading ? "Signing in.." : "Sign in with Passkey"}
           </Button>
         </div>
         <div className="mt-4 text-center text-sm">

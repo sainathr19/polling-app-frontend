@@ -6,7 +6,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Switch } from "@/components/ui/switch";
 import { Activity, User } from 'lucide-react';
 import { Poll, PollUpdate, VoteData } from '@/types/poll';
-import axiosInstance from '@/services/api.service';
+import axiosInstance from '@/lib/api.service';
 import { useParams } from 'next/navigation';
 import { useSSE } from '@/hooks/useSSE';
 import toast from 'react-hot-toast';

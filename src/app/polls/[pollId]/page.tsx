@@ -1,11 +1,10 @@
 "use client";
 
 import PollResultGraph from "@/components/PollResultGraph";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { CastVote, FetchWithPollId } from "@/services/poll.service";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import useLoading from "@/hooks/useLoading";
 import { useSSE } from "@/hooks/useSSE";
@@ -13,6 +12,8 @@ import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import Loader from "@/components/Loader";
 import { Poll, PollUpdate } from "@/types/poll";
+import axiosInstance from "@/lib/api.service";
+import { AxiosError } from "axios";
 
 const SSE_BASE_URL = process.env.NEXT_PUBLIC_SSE_BASE_URL || 'http://localhost:5000';
 
@@ -34,25 +35,25 @@ const ViewPoll = () => {
     setLiveData(data?.poll_data);
   }, [data]);
 
-  const fetchPollData = useCallback(async () => {
-    if (!pollId) return;
+  async function FetchPollData(){
+    if(!pollId) return;
     setLoading(true);
     try {
-      const data = await FetchWithPollId(pollId as string);
-      setPollData(data);
-    } catch (error) {
-      toast.error("Failed to load poll data");
+        const response = await axiosInstance.get(`/polls/${pollId}/search`);
+        setPollData(response.data);
+    } catch(err) {
+        toast.error("Unable to Fetch Poll Data")
     } finally {
       setLoading(false);
     }
-  }, [pollId, setLoading]);
+  }
 
   useEffect(() => {
-    fetchPollData();
+    FetchPollData();
     return () => {
       sseStopRef.current();
     };
-  }, [fetchPollData]);
+  }, []);
 
   const handleVote = async () => {
     if (!selectedOption || !pollId) {
@@ -60,11 +61,10 @@ const ViewPoll = () => {
       return;
     }
     try {
-      await CastVote(pollId as string, selectedOption);
-      toast.success("Vote cast successfully!");
-      setHasVoted(true);
-    } catch (error) {
-      toast.error("Failed to cast vote. Please try again.");
+      const response = await axiosInstance.post(`/polls/${pollId}/vote?option_id=${selectedOption}`);
+      return response.data;
+    } catch(err : any) {
+      toast.error(err.response.data)
     }
   };
 

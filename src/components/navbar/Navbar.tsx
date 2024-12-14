@@ -2,7 +2,7 @@ import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import { Button } from "../ui/button";
 import { LogOutIcon } from "lucide-react";
-import axiosInstance from "@/services/api.service";
+import axiosInstance from "@/lib/api.service";
 
 const Navbar = () => {
   const {isAuthenticated , setIsAuthenticated} = useAuth();

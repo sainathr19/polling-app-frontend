@@ -12,33 +12,22 @@ import {
 } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import useLoading from "@/hooks/useLoading";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
-import {
-  ClosePollByID,
-  DeletPollById,
-  FetchUserPolls,
-  ResetPollByID,
-} from "@/services/poll.service";
 import { Poll } from "@/types/poll";
 import { toast } from "react-hot-toast";
+import axiosInstance from "@/lib/api.service";
 
 export default function ManagePolls() {
   const [userPolls, setUserPolls] = useState<Poll[]>([]);
   const { isLoading, setLoading } = useLoading();
   const { Username } = useAuth();
 
-  const fetchUserPolls = async () => {
-    if (!Username) {
-      return;
-    }
+  const FetchUserPolls = async () => {
     setLoading(true);
     try {
-      const polls = await FetchUserPolls(Username);
-      setUserPolls(polls);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to fetch polls";
-      toast.error(errorMessage);
+      const {data : Polls} = await axiosInstance.get(`/all?userId=${Username}`);
+      setUserPolls(Polls);
+    } catch(err : any) {
+      toast.error(err.data?.message);
     } finally {
       setLoading(false);
     }
@@ -46,37 +35,37 @@ export default function ManagePolls() {
 
   useEffect(() => {
     if (Username) {
-      fetchUserPolls();
+      FetchUserPolls();
     }
   }, []);
 
   const handlePollReset = async (pollId: string) => {
     try {
-      await ResetPollByID(pollId);
-      toast.success("Poll has been reset successfully");
-      await fetchUserPolls();
-    } catch (error) {
-      toast.error("Failed to reset poll");
+      const {data : response} = await axiosInstance.post(`/polls/${pollId}/reset`);
+      toast.success(response);
+      await FetchUserPolls();
+    } catch (error : any) {
+      toast.error(error.data?.message);
     }
   };
 
   const handlePollDelete = async (pollId: string) => {
     try {
-      await DeletPollById(pollId);
+      const {data : response} = await axiosInstance.get(`/polls/${pollId}/delete`);
       setUserPolls((prev) => prev.filter((poll) => poll.pollId !== pollId));
-      toast.success("Poll has been deleted successfully");
-    } catch (error) {
-      toast.error("Failed to delete poll");
+      toast.success(response);
+    } catch (error : any) {
+      toast.error(error.data?.message);
     }
   };
 
   const handlePollClose = async (pollId: string) => {
     try {
-      await ClosePollByID(pollId);
-      await fetchUserPolls();
-      toast.success("Poll has been closed successfully");
-    } catch (error) {
-      toast.error("Failed to close poll");
+      const {data : response} = await axiosInstance.post(`/polls/${pollId}/close`);
+      toast.success(response);
+      await FetchUserPolls();
+    } catch (error : any) {
+      toast.error(error.data?.message);
     }
   };
 

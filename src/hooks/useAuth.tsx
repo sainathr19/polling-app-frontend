@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 /* eslint-disable react/prop-types */
-import axiosInstance from "@/services/api.service";
+import axiosInstance from "@/lib/api.service";
 import React, {
   createContext,
   useContext,

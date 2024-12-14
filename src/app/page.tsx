@@ -9,11 +9,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import useLoading from "@/hooks/useLoading";
-import { FetchAllPolls } from "@/services/poll.service";
 import { Poll } from "@/types/poll";
 import { useEffect, useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import axiosInstance from "@/lib/api.service";
 
 export default function Home() {
   const [availablePolls, setAvailablePolls] = useState<Poll[]>([]);
@@ -22,16 +22,16 @@ export default function Home() {
   const FetchPolls = async () => {
     setLoading(true);
     try {
-      const polls = await FetchAllPolls();
+      const {data : polls} = await axiosInstance.get(`/all`);
       setAvailablePolls(polls);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to fetch polls";
       setError(errorMessage);
-      console.log(err);
     }finally{
         setLoading(false);
     }
   };
+
   useEffect(() => {
     FetchPolls();
   }, []);
