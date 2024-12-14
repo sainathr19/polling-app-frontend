@@ -22,8 +22,10 @@ async function FetchWithPollId(pollId: string){
 }
 
 async function FetchAllPolls(){
+    console.log("Backend Base URL:", process.env.NEXT_PUBLIC_BACKEND_BASE_URL);
     try {
         const response = await axiosInstance.get(`/all`);
+        console.log("URL:", response.config.url);
         return response.data;
     } catch(err) {
         console.log("Error Fetching Polls : ", err);
